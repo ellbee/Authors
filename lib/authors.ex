@@ -7,12 +7,14 @@ defmodule Authors do
   end
 
   def request_contributor_urls(repo, user, password) do
+    IO.inspect "getting the contributors"
     Authors.get!("https://" <> user <> ":" <> password <> "@api.github.com/repos/" <> repo <> "/contributors")
     |> Map.get(:body)
     |> Enum.map(&Map.get(&1, "url"))
   end
   
   def get_name_and_email(contributor_url, user, password) do
+    IO.inspect "getting user for " <> contributor_url
     String.replace(contributor_url, ~r(https://), "https://" <> user <> ":" <> password <> "@")
     |> Authors.get!
     |> Map.get(:body)
@@ -36,12 +38,20 @@ defmodule Authors do
     |> Enum.map(&contributor_to_string(&1))
     |> Enum.join("\n")
     
-    File.write("AUTHORS", contributor_list)
+    File.mkdir_p!("out")
+    File.cd!("out", fn ->
+      File.write!("AUTHORS", contributor_list)
+    end)
   end
 
   def make_authors_file(repo, user, password) do
     request_contributor_urls(repo, user, password)
     |> request_contributor_details(user, password)
     |> write_to_authors_file
+  end
+
+  def main(args) do
+    {[user: user, password: password], [repo], []} = OptionParser.parse(args)
+    make_authors_file(repo, user, password)
   end
 end
