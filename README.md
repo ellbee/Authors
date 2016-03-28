@@ -6,4 +6,4 @@ Usage:
 
 mix build.escript
 
-./authors "reactjs/reselect" --user <username> --password <password>
+./authors "reactjs/reselect" --user \<username\> --password \<password\>
