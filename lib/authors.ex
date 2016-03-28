@@ -1,21 +1,18 @@
 defmodule Authors do
-  use HTTPoison.Base
-
-  def process_response_body(body) do
-    body
+  def get!(url) do
+    HTTPoison.get!(url)
+    |> Map.get(:body)
     |> Poison.decode!
   end
 
   def request_contributor_urls(repo, user, password) do
     Authors.get!("https://" <> user <> ":" <> password <> "@api.github.com/repos/" <> repo <> "/contributors")
-    |> Map.get(:body)
     |> Enum.map(&Map.get(&1, "url"))
   end
 
   def request_contributor(contributor_url, user, password) do
     String.replace(contributor_url, ~r(https://), "https://" <> user <> ":" <> password <> "@")
     |> Authors.get!
-    |> Map.get(:body)
   end
 
   def request_contributors(contributor_urls, user, password) do
@@ -40,11 +37,14 @@ defmodule Authors do
     end)
   end
 
-  def main(args) do
-    {[user: user, password: password], [repo], []} = OptionParser.parse(args)
-
+  def make_authors_file(repo, user, password) do
     request_contributor_urls(repo, user, password)
     |> request_contributors(user, password)
     |> write_to_authors_file
+  end
+
+  def main(args) do
+    {[user: user, password: password], [repo], []} = OptionParser.parse(args)
+    make_authors_file(repo, user, password)
   end
 end
