@@ -5,16 +5,23 @@ defmodule Authors do
     |> Poison.decode!
   end
 
+  def make_url(url, "", "") do
+    url
+  end
+
+  def make_url(url, user, password) do
+    String.replace(url, ~r(https://), "https://" <> user <> ":" <> password <> "@")
+  end
+
   def request_contributor_urls(repo, user, password) do
-    Authors.get!("https://" <> user <>
-      ":" <> password <> "@api.github.com/repos/" <>
-      repo <> "/contributors")
+    "https://api.github.com/repos/" <> repo <> "/contributors"
+    |> make_url(user, password)
+    |> Authors.get!
     |> Enum.map(&Map.get(&1, "url"))
   end
 
   def request_contributor(contributor_url, user, password) do
-    String.replace(contributor_url, ~r(https://),
-      "https://" <> user <> ":" <> password <> "@")
+    make_url(contributor_url, user, password)
     |> Authors.get!
   end
 
@@ -49,7 +56,11 @@ defmodule Authors do
   end
 
   def main(args) do
-    {[user: user, password: password], [repo], []} = OptionParser.parse(args)
-    make_authors_file(repo, user, password)
+    case OptionParser.parse(args) do
+      {[user: user, password: password], [repo], []} ->
+        make_authors_file(repo, user, password)
+      {[], [repo], []} ->
+        make_authors_file(repo, "", "")
+    end
   end
 end
