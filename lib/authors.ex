@@ -7,14 +7,12 @@ defmodule Authors do
   end
 
   def request_contributor_urls(repo, user, password) do
-    IO.inspect "getting the contributors"
     Authors.get!("https://" <> user <> ":" <> password <> "@api.github.com/repos/" <> repo <> "/contributors")
     |> Map.get(:body)
     |> Enum.map(&Map.get(&1, "url"))
   end
   
   def get_name_and_email(contributor_url, user, password) do
-    IO.inspect "getting user for " <> contributor_url
     String.replace(contributor_url, ~r(https://), "https://" <> user <> ":" <> password <> "@")
     |> Authors.get!
     |> Map.get(:body)
@@ -27,7 +25,6 @@ defmodule Authors do
   end
 
   def contributor_to_string(contributor) do
-    IO.inspect(contributor)
     %{"name" => name, "email" => email, "url" => url, "login" => login} = contributor
     email = if email, do: " <" <> email <> ">", else: ""
     (name || login) <> email <> " (" <> url <> ")"
