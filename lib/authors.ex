@@ -6,12 +6,15 @@ defmodule Authors do
   end
 
   def request_contributor_urls(repo, user, password) do
-    Authors.get!("https://" <> user <> ":" <> password <> "@api.github.com/repos/" <> repo <> "/contributors")
+    Authors.get!("https://" <> user <>
+      ":" <> password <> "@api.github.com/repos/" <>
+      repo <> "/contributors")
     |> Enum.map(&Map.get(&1, "url"))
   end
 
   def request_contributor(contributor_url, user, password) do
-    String.replace(contributor_url, ~r(https://), "https://" <> user <> ":" <> password <> "@")
+    String.replace(contributor_url, ~r(https://),
+      "https://" <> user <> ":" <> password <> "@")
     |> Authors.get!
   end
 
@@ -21,7 +24,9 @@ defmodule Authors do
     |> Enum.map(&Task.await(&1, 10000))
   end
 
-  def contributor_to_string(%{"name" => name, "email" => email, "url" => url, "login" => login}) do
+  def contributor_to_string(
+    %{"name" => name, "email" => email, "url" => url, "login" => login}
+  ) do
     email = if email, do: " <" <> email <> ">", else: ""
     (name || login) <> email <> " (" <> url <> ")"
   end
