@@ -6,6 +6,7 @@ defmodule Authors.Mixfile do
      version: "0.0.1",
      elixir: "~> 1.2",
      escript: [main_module: Authors],
+     dialyzer: [plt_add_deps: true],
      deps: deps]
   end
 
@@ -28,7 +29,8 @@ defmodule Authors.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 0.8.0"},
-      {:poison, "~> 2.0"}
+      {:poison, "~> 2.0"},
+      {:dialyxir, "~> 0.3", only: [:dev]}
     ]
   end
 end
